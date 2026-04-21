@@ -172,301 +172,60 @@ const Z={
 //  (fuente: URL Google Maps proporcionada por el usuario)
 //  Todas las coordenadas calibradas a partir de este punto.
 // ══════════════════════════════════════════════════════════════════
-const DATA=[
-  {id:1,name:"Hermandad del Vía Crucis del Santo Cristo de la Salud",zone:"h",address:"Pl. de la Trinidad, Córdoba",
-   lat:37.8808,lng:-4.7768, // ⚠ estimado — verifica en Maps
-   desc:"Cruz histórica en la Plaza de la Trinidad, en el corazón del barrio de la Catedral.",
-   tags:["Plaza de la Trinidad","Casco histórico","Cristo de la Salud"],award:null},
-
-  {id:2,name:"Hdad. de la Sentencia de Córdoba",zone:"h",address:"Pl. San Felipe, Córdoba",
-   lat:37.8926,lng:-4.7779,
-   desc:"Fundada en 1944, llenó el vacío del Lunes Santo cordobés. Sus titulares son obra del imaginero Juan Martínez Cerrillo.",
-   tags:["Fundada 1944","Lunes Santo","J.M. Cerrillo"],award:"🏆 Premio especial del jurado (múltiples ediciones)"},
-
-  {id:3,name:"Asoc. Amigos del Gazpacho",zone:"c", // ← era zone:"m"
-   address:"C/ Doce de Octubre, Córdoba",
-   lat:37.8894,lng:-4.7742,
-   desc:"Recinto cerrado de marcado carácter festivo y gastronómico. Flores, buena compañía y el gazpacho más fresco del mayo cordobés.",
-   tags:["Recinto cerrado","Gastronomía","Tradición popular"],award:null},
-
-  {id:4,name:"Hermandad de Ntra. Sra. de los Dolores",zone:"c",address:"Pl. de Capuchinos, Córdoba",
-   lat:37.8882,lng:-4.7785, // ✓ confirmado por ti
-   desc:"Hermandad penitencial de gran arraigo. Instala su cruz en la histórica Plaza de Capuchinos.",
-   tags:["Plaza Capuchinos","Viernes Santo","Recinto cerrado"],award:"🏅 Accésit concurso (varias ediciones)"},
-
-  {id:5,name:"Hermandad de la Paz y Esperanza",zone:"h", // ← nombre y dirección cambiados
-   address:"Pl. Ntra. Sra. de la Paz y Esperanza, Córdoba",
-   lat:37.8867,lng:-4.7758, // ⚠ estimado
-   desc:"Instalada en la plaza que lleva el nombre de sus titulares. Su cruz transmite el espíritu de reconciliación que la cofradía representa.",
-   tags:["Paz y Esperanza","Casco histórico","Devoción popular"],award:"🥈 2.º Premio Casco Histórico (varias ediciones)"},
-
-  {id:6,name:"Hermandad del Císter",zone:"h", // ← nombre cambiado (no es Padre Jesús de la Sangre)
-   address:"Pl. del Cardenal Toledo, Córdoba",
-   lat:37.8825,lng:-4.7738,
-   desc:"La Hermandad del Císter instala su cruz en la Plaza del Cardenal Toledo, uno de los rincones más señoriales del casco histórico.",
-   tags:["Plaza Cardenal Toledo","Arte floral","Centro histórico"],award:null},
-
-  {id:7,name:"Hermandad de la Santa Faz de Nuestro Señor Jesucristo",zone:"h",address:"Pl. de la Compañía, Córdoba",
-   lat:37.8817,lng:-4.7783,
-   desc:"Frente a la iglesia jesuita del siglo XVII, crea una de las estampas más evocadoras del festival.",
-   tags:["Plaza de la Compañía","Iglesia jesuita s.XVII","Parada obligatoria"],award:null},
-
-  {id:8,name:"Hermandad Oración en el Huerto",zone:"h", // ← nombre y dirección cambiados
-   address:"Pl. de San Francisco, Córdoba",
-   lat:37.8808,lng:-4.7770, // ⚠ estimado
-   desc:"Campeona histórica del concurso. Ganadora del Primer Premio del Casco Histórico en múltiples ediciones, referencia absoluta de calidad floral.",
-   tags:["Plaza San Francisco","Campeona histórica","Arte floral máximo"],award:"🥇 1.er Premio Casco Histórico (2018, 2023 y más)"},
-
-  {id:9,name:"Peña Cordobesista Amigos de Lorena y Manolín",zone:"m", // ← era zone:"h"
-   address:"C/ Ntra. Sra. de Belén, Córdoba",
-   lat:37.8730,lng:-4.7643, // ⚠ estimado
-   desc:"Una de las peñas más queridas del festival. Ambiente familiar y festivo con sevillanas hasta el amanecer.",
-   tags:["Peña cultural","Sevillanas","Ambiente festivo"],award:null},
-
-  {id:10,name:"Hermandad del Calvario",zone:"h", // ← dirección cambiada (no es Pl. Abades)
-   address:"Pl. de las Cañas, Córdoba",
-   lat:37.8754,lng:-4.7741, // ⚠ estimado
-   desc:"La Plaza de las Cañas, rincón recóndito del casco antiguo, cobra vida con esta hermandad.",
-   tags:["Plaza de las Cañas","Rincón histórico","Medieval"],award:"🏅 Premio adicional Casco Histórico"},
-
-  {id:11,name:"Hdad. Ntra. Sra. del Socorro",zone:"h",address:"Pl. del Socorro, Córdoba",
-   lat:37.8779,lng:-4.7754,
-   desc:"Arraigada hermandad que da vida cada mayo a la Plaza del Socorro.",
-   tags:["Plaza del Socorro","Mudéjar y flores","Tradición barrial"],award:"🏅 Premio adicional (varias ediciones)"},
-
-  {id:12,name:"Hermandad de la Misericordia",zone:"h",address:"Pl. de San Pedro, Córdoba",
-   lat:37.8754,lng:-4.7701,
-   desc:"Con sede en la Iglesia de San Pedro, uno de los templos mozárabes más antiguos de Córdoba.",
-   tags:["Iglesia San Pedro","Templo mozárabe","Historia viva"],award:"🏅 Premio adicional Casco Histórico (2018)"},
-
-  {id:13,name:"Hermandad de La Estrella",zone:"m",address:"Pasaje de las Almuñias, Córdoba",
-   lat:37.8952,lng:-4.7942,
-   desc:"Cruz en la zona norte, en el pintoresco Pasaje de las Almuñias.",
-   tags:["Pasaje Almuñias","Jardín andaluz","Zona norte"],award:null},
-
-  {id:14,name:"Casa de Sevilla",zone:"c",address:"Ronda de Andújar, Córdoba",
-   lat:37.8712,lng:-4.7622,
-   desc:"Sede de la comunidad sevillana. Flamencas impecables, vinos de Jerez y decoración que rinde homenaje a las dos capitales del sur.",
-   tags:["Comunidad sevillana","Flamenco y vino","Recinto selecto"],award:"🏅 Premio adicional Recintos Cerrados (2018)"},
-
-  {id:15,name:"Colegio Oficial de Agentes Comerciales",zone:"m", // ← era zone:"c" y dirección errónea
-   address:"Avda. Turruñuelos con Avda. Abderramán I, Córdoba",
-   lat:37.8963,lng:-4.7877, // ⚠ estimado
-   desc:"El Colegio transforma su sede en un espacio festivo. Su espíritu de reunión convierte el festival en una cita donde Córdoba se reencuentra.",
-   tags:["Avda. Turruñuelos","Zona noroeste","Colegio histórico"],award:null},
-
-  {id:16,name:"Hermandad del Santísimo Cristo de las Lágrimas",zone:"m", // ← dirección cambiada
-   address:"Pl. de la Marina Española, Córdoba",
-   lat:37.8685,lng:-4.7878, // ⚠ estimado
-   desc:"El Cristo de las Lágrimas, imagen de gran emotividad, inspira una decoración floral que mezcla devoción y explosión de color primaveral.",
-   tags:["Plaza Marina Española","Imagen emotiva","Explosión de color"],award:null},
-
-  {id:17,name:"Hermandad de la Quinta Angustia",zone:"m", // ← era zone:"h" y dirección errónea
-   address:"Bulevar Pl. de Colón / Jardines del Vial, Córdoba",
-   lat:37.8933,lng:-4.7789, // ⚠ estimado
-   desc:"Cruz de gran formato en el entorno del bulevar de la Plaza de Colón y los Jardines del Vial.",
-   tags:["Bulevar Pl. Colón","Jardines del Vial","Arte sacro"],award:null},
-
-  {id:18,name:"Hermandad del Cristo del Caído y Ntra. Sra. del Mayor Dolor en su Soledad",zone:"m",
-   address:"Pl. Flor del Olivo, Córdoba",
-   lat:37.8911,lng:-4.7700,
-   desc:"La Plaza Flor del Olivo se llena de vida con esta hermandad de popular advocación.",
-   tags:["Plaza Flor del Olivo","Advocación popular","Devoción cercana"],award:null},
-
-  {id:19,name:"Acopinb",zone:"c",address:"Instalaciones Deportivas El Carmen, Córdoba",
-   lat:37.8923,lng:-4.7628,
-   desc:"La Asociación Cordobesa para la Integración de Niñas y Niños Border Line lleva inclusión y esperanza al festival.",
-   tags:["Inclusión social","Niños Border Line","Mensaje solidario"],award:"🥇 1.er Premio Recintos Cerrados (2018)"},
-
-  {id:20,name:"Hdad. Santa Cruz en el Monte Calvario y Mª Sma. en su Soledad",zone:"h", // ← nombre y dirección
-   address:"Pl. de la Lagunilla, Córdoba",
-   lat:37.8876,lng:-4.7693,
-   desc:"La devoción a la Soledad se materializa cada mayo en la Plaza de la Lagunilla, con el contraste entre austeridad serena y flores exuberantes.",
-   tags:["Plaza de la Lagunilla","Advocación mariana","Intimismo"],award:"🏅 Premio adicional Casco Histórico (2018)"},
-
-  {id:21,name:"Hermandad del Resucitado y Mª Sma. Reina de Ntra. Alegría",zone:"h",address:"Pl. Conde de Priego, Córdoba",
-   lat:37.8844,lng:-4.7703,
-   desc:"La única hermandad que sale el Domingo de Resurrección en Córdoba. Cruz luminosa y exuberante.",
-   tags:["Domingo de Resurrección","Cruz luminosa","Alegría pascual"],award:"🥉 3.er Premio Casco Histórico (2018, 2023)"},
-
-  {id:22,name:"Hermandad de la Expiración",zone:"h",address:"Sacristía Iglesia Sta. Marina, Córdoba",
-   lat:37.8840,lng:-4.7693,
-   desc:"La Iglesia de Santa Marina, templo del siglo XIII, es el marco incomparable. Cruz vestida con claveles rojos.",
-   tags:["Iglesia s.XIII","Santa Marina","Claveles rojos"],award:null},
-
-  {id:23,name:"Hermandad del Prendimiento",zone:"c", // ← era zone:"h"
-   address:"C/ María Auxiliadora, Córdoba",
-   lat:37.8742,lng:-4.7645,
-   desc:"Recinto cerrado con vocación educativa salesiana. Cruz familiar en el sur de la ciudad.",
-   tags:["Salesianos","Recinto cerrado","Vocación educativa"],award:null},
-
-  {id:24,name:"Hdad. de las Penas y la Esperanza",zone:"c", // ← nombre, dirección y zona cambiados
-   address:"C/ Escañuela, Córdoba",
-   lat:37.8732,lng:-4.7648, // ⚠ estimado
-   desc:"Recinto cerrado que combina devoción y tradición popular en la calle Escañuela.",
-   tags:["Recinto cerrado","C/ Escañuela","Esperanza andaluza"],award:null},
-
-  {id:25,name:"Hdad. Nuestro Padre Jesús Nazareno",zone:"h",address:"Pl. del Padre Cristóbal, Córdoba",
-   lat:37.8804,lng:-4.7661,
-   desc:"El Nazareno con la cruz a cuestas, una de las imágenes más veneradas de Córdoba. Premio 2023.",
-   tags:["Nazareno popular","Maestría floral","Premio 2023"],award:"🥉 3.er Premio Casco Histórico (2023)"},
-
-  {id:26,name:"Hdad. del Santísimo Cristo del Descendimiento",zone:"m", // ← dirección cambiada
-   address:"Jardines del Rocío, Miraflores, Córdoba",
-   lat:37.8648,lng:-4.7743, // ⚠ estimado
-   desc:"En los Jardines del Rocío de Miraflores, con talleres de sevillanas, flamenco en vivo y actividades infantiles.",
-   tags:["Miraflores","Jardines del Rocío","Comunidad"],award:null},
-
-  {id:27,name:"Hermandad del Santísimo Cristo del Amor",zone:"m",
-   address:"Avda. Fray Albino (frente a La Calahorra), Córdoba",
-   lat:37.8660,lng:-4.7760,
-   desc:"Con la Torre de la Calahorra como telón de fondo. Una de las cruces más románticas del festival.",
-   tags:["Torre de la Calahorra","Guadalquivir","Cruz romántica"],award:null},
-
-  {id:28,name:"Hermandad Sacramental de la Sagrada Cena",zone:"m",
-   address:"C/ José Dámaso 'Pepete', Barriada Villarrubia, Córdoba",
-   lat:37.8687,lng:-4.8046,
-   desc:"En Villarrubia, lejos del centro turístico pero con el mismo fervor. Ambiente de vecindad auténtica.",
-   tags:["Barriada Villarrubia","Fervor de barrio","Comunidad"],award:"🏅 Premio adicional Zonas Modernas"},
-
-  {id:29,name:"Acpacys",zone:"c",address:"C/ Dolores Ibárruri, Córdoba",
-   lat:37.8930,lng:-4.7842,
-   desc:"La Asociación Cordobesa de Parálisis Cerebral monta una de las cruces más emotivas del certamen.",
-   tags:["Parálisis Cerebral","Inclusión","Cruz más emotiva"],award:"🥇 1.er Premio Recintos Cerrados (múltiples ediciones)"},
-
-  {id:30,name:"Asoc. Colega de Córdoba",zone:"m", // ← era zone:"c" y dirección errónea
-   address:"Pl. de España, Córdoba",
-   lat:37.8916,lng:-4.7758, // ⚠ estimado
-   desc:"La Plaza de España acoge uno de los espacios más animados del festival. Buen ambiente y flamenco nocturno.",
-   tags:["Plaza de España","Flamenco nocturno","Buen ambiente"],award:null},
-
-  {id:31,name:"Asoc. Cultural Los Quintos",zone:"m", // ← era zone:"c" y dirección errónea
-   address:"Bulevar Hernán Ruiz, Córdoba",
-   lat:37.8893,lng:-4.7706, // ⚠ estimado
-   desc:"Los Quintos llevan décadas siendo Premio Adicional del concurso. Su espíritu joven crea cada año una sorpresa visual.",
-   tags:["Bulevar Hernán Ruiz","Espíritu joven","Identidad cordobesa"],award:"🏅 Premio adicional Zonas Modernas (varias ediciones)"},
-
-  {id:32,name:"Asoc. Vec. Huerta del Rey",zone:"m",address:"C/ Cairuán s/n, Córdoba",
-   lat:37.8780,lng:-4.7955,
-   desc:"Una de las asociaciones de vecinos más activas. Ganadora del 3.er Premio de Zonas Modernas en 2018.",
-   tags:["Barrio Huerta del Rey","Vecinos activos","Calle Cairuán"],award:"🥉 3.er Premio Zonas Modernas (2018)"},
-
-  {id:33,name:"Asoc. Vec. Alcázar Viejo",zone:"c", // ← era zone:"h"
-   address:"Torre de Belén, C/ San Basilio, Córdoba",
-   lat:37.8749,lng:-4.7887,
-   desc:"El barrio del Alcázar Viejo, junto al Alcázar de los Reyes Cristianos. Ganó el 1.er Premio Casco Histórico en 2023, ahora compite en Recintos Cerrados.",
-   tags:["Torre de Belén","San Basilio","Callejuelas andaluzas"],award:"🥇 1.er Premio Casco Histórico (2023)"},
-
-  {id:34,name:"Hermandad del Santo Sepulcro",zone:"c", // ← era zone:"h" y dirección completamente errónea
-   address:"Triunfo de San Rafael, C/ Torrijos, Córdoba",
-   lat:37.8781,lng:-4.7801, // ⚠ estimado
-   desc:"Recinto cerrado junto al emblemático Triunfo de San Rafael, en la calle Torrijos a un paso de la Mezquita.",
-   tags:["Triunfo de San Rafael","C/ Torrijos","Junto a la Mezquita"],award:"🏅 Premio adicional (2018)"},
-
-  {id:35,name:"Asoc. Vec. La Promisión",zone:"m",address:"Pl. de los Ríos, Barriada Villarrubia, Córdoba",
-   lat:37.8755,lng:-4.7993,
-   desc:"En Villarrubia, la Promisión llena la Plaza de los Ríos de flores y compromiso vecinal.",
-   tags:["Barriada Villarrubia","Plaza de los Ríos","Compromiso vecinal"],award:"🏅 Premio adicional Zonas Modernas"},
-
-  {id:36,name:"Club de Matrimonios La Unión",zone:"c",address:"C/ Bilbao, Córdoba",
-   lat:37.8837,lng:-4.8007,
-   desc:"El recinto más familiar del certamen. Décadas de vida compartida celebradas con sevillanas.",
-   tags:["Recinto familiar","Matrimonios","Sevillanas en pareja"],award:null},
-
-  {id:37,name:"Asoc. Vec. Cañero Nuevo",zone:"m",address:"C/ Párroco Bartolomé Blanco, Córdoba",
-   lat:37.8677,lng:-4.7601,
-   desc:"Campeona del Primer Premio de Zonas Modernas en múltiples ediciones. Su calle se convierte en catedral de flores.",
-   tags:["Barrio Cañero","Campeona Zonas Modernas","Meses de trabajo"],award:"🥇 1.er Premio Zonas Modernas (2018 y más)"},
-
-  {id:38,name:"Hermandad de la Merced",zone:"m",address:"Jardines Músico Pedro Gámez Laserna, Córdoba",
-   lat:37.8781,lng:-4.7623,
-   desc:"Los Jardines Pedro Gámez Laserna acogen esta hermandad. El verde del jardín contrasta con el rojo de los claveles.",
-   tags:["Jardines históricos","Pedro Gámez Laserna","Postal fotográfica"],award:"🥉 3.er Premio Zonas Modernas (2018)"},
-
-  {id:39,name:"Hdad. Penitencial del Santo Cristo de Gracia",zone:"c",address:"C/ Queso, Córdoba",
-   lat:37.8776,lng:-4.7808,
-   desc:"Recinto en la coqueta calle del Queso, a un paso de la Mezquita. Ganadora del 2.º Premio de Recintos Cerrados en 2018.",
-   tags:["Calle del Queso","Junto a la Mezquita","Córdoba mestiza"],award:"🥈 2.º Premio Recintos Cerrados (2018)"},
-
-  {id:40,name:"Hermandad del Buen Suceso",zone:"h",address:"Pl. Poeta Juan Bernier, Córdoba",
-   lat:37.8803,lng:-4.7660,
-   desc:"Cruz y poesía se funden en mayo en la Plaza del Poeta Juan Bernier.",
-   tags:["Plaza Poeta Bernier","Cruz y poesía","Homenaje literario"],award:null},
-
-  {id:41,name:"Hermandad del Cristo de las Penas de Santiago",zone:"h",address:"Pl. de San Andrés, Córdoba",
-   lat:37.8795,lng:-4.7664,
-   desc:"La Plaza de San Andrés, con su iglesia románica del siglo XIV. Cruz con arquitectura floral que parece desafiar la gravedad.",
-   tags:["Iglesia San Andrés s.XIV","Arquitectura floral","Plaza histórica"],award:null},
-
-  {id:42,name:"Hermandad Penitencial de las Cinco Llagas",zone:"m", // ← dirección cambiada
-   address:"Pl. del Jazmín, Córdoba",
-   lat:37.8820,lng:-4.7568, // ⚠ estimado
-   desc:"Las cinco heridas de Cristo inspiran esta hermandad del este. Cinco pétalos, cinco colores en la Plaza del Jazmín.",
-   tags:["Plaza del Jazmín","Zona este","Arte simbólico"],award:null},
-
-  {id:43,name:"Asoc. Vecinal La Medina",zone:"h",address:"Pl. Jerónimo Páez, Córdoba",
-   lat:37.8799,lng:-4.7793,
-   desc:"Cruz junto al Museo Arqueológico. Córdoba sobre Córdoba: flores de mayo sobre dos mil años de historia.",
-   tags:["Museo Arqueológico","Córdoba árabe","Historia sobre historia"],award:"🥇 1.er Premio 2025"},
-
-  {id:44,name:"Casa Regional de Castilla-La Mancha",zone:"m", // ← era zone:"c"
-   address:"Jardines Presidente Adolfo Suárez, Córdoba",
-   lat:37.8873,lng:-4.7569,
-   desc:"La comunidad castellano-manchega lleva el sabor de La Mancha a los Jardines Presidente Adolfo Suárez.",
-   tags:["Castilla-La Mancha","Jardines Adolfo Suárez","Comunidad regional"],award:null},
-
-  {id:45,name:"Hermandad de la Pasión",zone:"m",
-   address:"Bulevar C/ Emilia Pardo Bazán – C/ Nuestro Padre Jesús Caído, Córdoba",
-   lat:37.8831,lng:-4.8024,
-   desc:"Cruz monumental en el amplio bulevar del oeste. Punto de reunión del barrio durante los cinco días de fiesta.",
-   tags:["Bulevar Emilia Pardo Bazán","Cruz monumental","Barrio oeste"],award:null},
-
-  {id:46,name:"Hermandad del Cristo de la Buena Muerte",zone:"h",address:"Pl. San Ignacio de Loyola, Córdoba",
-   lat:37.8857,lng:-4.7858, // ✓ confirmado por ti
-   desc:"El nombre más paradójico del festival. La Buena Muerte celebra la vida con exuberancia floral única en la Plaza de Loyola.",
-   tags:["Plaza San Ignacio de Loyola","Paradoja floral","Nombre único"],award:null},
-
-  {id:47,name:"Hdad. de Jesús de los Reyes y Mª Sma. de la Victoria",zone:"h",address:"Pl. de San Agustín, Córdoba",
-   lat:37.8841,lng:-4.7672,
-   desc:"La entrada triunfal de Jesús en Jerusalén da nombre a esta hermandad. Cruz exuberante en naranja, amarillo y verde.",
-   tags:["Domingo de Ramos","Plaza San Agustín","Colores mediterráneos"],award:null},
-
-  {id:48,name:"Parroquia Santuario Ntra. Sra. de la Fuensanta",zone:"m",
-   address:"Pl. del Santuario Ntra. Sra. de la Fuensanta, Córdoba",
-   lat:37.8696,lng:-4.7640,
-   desc:"La Patrona de Córdoba tiene su propia plaza y su propia cruz de mayo.",
-   tags:["Patrona de Córdoba","Santuario Fuensanta","Devoción patronal"],award:null},
-
-  {id:49,name:"Asoc. Cultural Es Vida",zone:"m", // ← era zone:"c"
-   address:"Avda. de los Piconeros, Córdoba",
-   lat:37.8935,lng:-4.7645,
-   desc:"Asociación jovial que demuestra que la tradición tiene el futuro asegurado.",
-   tags:["Asociación juvenil","Celebración de la vida","Tradición y futuro"],award:null},
-
-  {id:50,name:"Asoc. Cultural Social Tradición Cordobesa",zone:"m", // ← era zone:"c" y dirección errónea
-   address:"C/ Carril de los Toros, Córdoba",
-   lat:37.8932,lng:-4.7768, // ⚠ estimado
-   desc:"El nombre es el programa. Folklore local, traje de flamenca y cante jondo como protagonistas.",
-   tags:["C/ Carril de los Toros","Folklore local","Cante jondo"],award:null},
-
-  {id:51,name:"Parroquia Ntra. Sra. del Carmen",zone:"h", // ← era zone:"m"
-   address:"Pl. de la Magdalena, Córdoba",
-   lat:37.8747,lng:-4.7689,
-   desc:"La bellísima Plaza de la Magdalena en el casco histórico acoge esta parroquia. La Virgen del Carmen une devoción marinera y flores de mayo.",
-   tags:["Plaza Magdalena","Virgen del Carmen","Casco histórico"],award:"🏅 Premio adicional Casco Histórico"},
-
-  {id:52,name:"Hermandad del Santísimo Cristo del Rescatado",zone:"m",
-   address:"Jardines Elena Moyano Madre Coraje, Córdoba",
-   lat:37.8812,lng:-4.7560,
-   desc:"El Rescatado inspira una cruz que cierra el festival en el extremo este. Un barrio que cada mayo se convierte en corazón de Córdoba.",
-   tags:["Cristo liberado","Zona este","Barrio con corazón"],award:null},
-
-  // ─── NUEVA ENTRADA — no existía en el código original ───
-  {id:53,name:"Asoc. Vecinal Arenal Arcángel",zone:"c",
-   address:"Instalaciones Deportivas Enrique Puga, Córdoba",
-   lat:37.8694,lng:-4.7981, // ⚠ estimado
-   desc:"La Asociación Vecinal Arenal Arcángel instala su recinto cerrado en las Instalaciones Deportivas Enrique Puga. Una cruz que reúne a la comunidad del barrio.",
-   tags:["Recinto cerrado","Instalaciones Enrique Puga","Comunidad vecinal"],award:null},
+const DATA = [
+  { id: 1, name: "Hermandad del Vía Crucis", zone: "h", address: "Plaza de la Trinidad", lat: 37.88252, lng: -4.78302, desc: "Cruz histórica en el corazón de la Judería.", tags: ["Trinidad", "Casco Histórico"], award: null },
+  { id: 2, name: "Hermandad de la Sentencia", zone: "h", address: "Plaza de San Nicolás", lat: 37.88502, lng: -4.78208, desc: "Ubicada en la emblemática Plaza de San Nicolás.", tags: ["San Nicolás", "Casco Histórico"], award: "🏆 Premio especial" },
+  { id: 3, name: "Asoc. Amigos del Gazpacho", zone: "c", address: "C/ Doce de Octubre", lat: 37.89281, lng: -4.77721, desc: "Recinto cerrado con gran tradición gastronómica.", tags: ["Gastronomía", "Recinto Cerrado"], award: null },
+  { id: 4, name: "Hermandad de los Dolores", zone: "c", address: "Plaza de Capuchinos", lat: 37.88642, lng: -4.77885, desc: "Situada en la famosa plaza del Cristo de los Faroles.", tags: ["Capuchinos", "Recinto Cerrado"], award: "🏅 Accésit" },
+  { id: 5, name: "Hermandad de la Paz y Esperanza", zone: "h", address: "Cuesta del Bailío", lat: 37.88688, lng: -4.77805, desc: "Una de las estampas más bellas de Córdoba.", tags: ["Bailío", "Casco Histórico"], award: "🥈 2º Premio" },
+  { id: 6, name: "Hermandad de la Sangre (El Císter)", zone: "h", address: "Plaza del Cardenal Toledo", lat: 37.88601, lng: -4.77652, desc: "Entorno señorial junto a la plaza de los ruidos.", tags: ["Cardenal Toledo", "Casco Histórico"], award: null },
+  { id: 7, name: "Hermandad de la Santa Faz", zone: "h", address: "Plaza de la Compañía", lat: 37.88358, lng: -4.77801, desc: "Frente a la parroquia del Salvador y Santo Domingo de Silos.", tags: ["Compañía", "Casco Histórico"], award: null },
+  { id: 8, name: "Hermandad del Huerto", zone: "h", address: "Plaza de la Tierra Andaluza", lat: 37.88124, lng: -4.77451, desc: "Ganadora histórica por su calidad floral.", tags: ["San Francisco", "Casco Histórico"], award: "🥇 1er Premio" },
+  { id: 9, name: "Peña Amigos de Lorena y Manolín", zone: "m", address: "C/ Ntra. Sra. de Belén", lat: 37.87305, lng: -4.76432, desc: "Ambiente de barrio y peña tradicional.", tags: ["Sector Sur", "Zona Moderna"], award: null },
+  { id: 10, name: "Hermandad del Calvario", zone: "h", address: "Plaza de las Cañas", lat: 37.88259, lng: -4.77558, desc: "Rincón medieval cerca de la Corredera.", tags: ["Las Cañas", "Casco Histórico"], award: "🏅 Premio adicional" },
+  { id: 11, name: "Hermandad del Socorro", zone: "h", address: "Plaza del Socorro", lat: 37.88213, lng: -4.77405, desc: "Cruz con mucha solera en el barrio de San Pedro.", tags: ["Socorro", "Casco Histórico"], award: null },
+  { id: 12, name: "Hermandad de la Misericordia", zone: "h", address: "Plaza de San Pedro", lat: 37.88254, lng: -4.77259, desc: "Junto a la basílica de San Pedro.", tags: ["San Pedro", "Casco Histórico"], award: null },
+  { id: 13, name: "Hermandad de la Estrella", zone: "m", address: "Pasaje de las Almunias", lat: 37.89521, lng: -4.79421, desc: "Pintoresco rincón en la zona norte.", tags: ["Huerta de la Reina", "Zona Moderna"], award: null },
+  { id: 14, name: "Casa de Sevilla", zone: "c", address: "Ronda de Andújar, 17", lat: 37.88552, lng: -4.76854, desc: "Recinto cerrado con sabor a feria.", tags: ["Flamenco", "Recinto Cerrado"], award: null },
+  { id: 15, name: "Colegio Agentes Comerciales", zone: "m", address: "Avda. Turruñuelos", lat: 37.89952, lng: -4.79951, desc: "Cruz en la zona de expansión noroeste.", tags: ["Noroeste", "Zona Moderna"], award: null },
+  { id: 16, name: "Hermandad de las Lágrimas", zone: "m", address: "Plaza de la Marina Española", lat: 37.86852, lng: -4.78781, desc: "En el corazón del barrio del Parque Figueroa.", tags: ["Figueroa", "Zona Moderna"], award: null },
+  { id: 17, name: "Hermandad de la Quinta Angustia", zone: "m", address: "Jardines del Vial", lat: 37.89102, lng: -4.78204, desc: "Cruz moderna en el Bulevar de Gran Capitán.", tags: ["Vial Norte", "Zona Moderna"], award: null },
+  { id: 18, name: "Hermandad del Caído", zone: "m", address: "Plaza Flor del Olivo", lat: 37.89114, lng: -4.77002, desc: "Cruz muy popular junto a los Jardines de Colón.", tags: ["Flor del Olivo", "Zona Moderna"], award: null },
+  { id: 19, name: "Acopinb", zone: "c", address: "Colegio El Carmen", lat: 37.89245, lng: -4.76281, desc: "Cruz solidaria e inclusiva.", tags: ["Solidaridad", "Recinto Cerrado"], award: "🥇 1er Premio Cerrados" },
+  { id: 20, name: "Hermandad de la Soledad", zone: "h", address: "Plaza de la Lagunilla", lat: 37.88851, lng: -4.77609, desc: "Barrio torero de Santa Marina.", tags: ["Lagunilla", "Casco Histórico"], award: null },
+  { id: 21, name: "Hermandad del Resucitado", zone: "h", address: "Plaza del Conde de Priego", lat: 37.88752, lng: -4.77583, desc: "Frente a la iglesia de Santa Marina y el monumento a Manolete.", tags: ["Santa Marina", "Casco Histórico"], award: "🥉 3er Premio" },
+  { id: 22, name: "Hermandad de la Expiración", zone: "h", address: "Plaza de la Sacristía de Sta. Marina", lat: 37.88931, lng: -4.77418, desc: "Cruz clásica con claveles rojos.", tags: ["Santa Marina", "Casco Histórico"], award: null },
+  { id: 23, name: "Hermandad del Prendimiento", zone: "c", address: "Colegio Salesianos", lat: 37.88751, lng: -4.76952, desc: "Recinto en el patio del colegio salesiano.", tags: ["Salesianos", "Recinto Cerrado"], award: null },
+  { id: 24, name: "Hdad. de las Penas y la Esperanza", zone: "c", address: "C/ Escañuela", lat: 37.88451, lng: -4.76512, desc: "Tradición en el barrio de San Lorenzo.", tags: ["San Lorenzo", "Recinto Cerrado"], award: null },
+  { id: 25, name: "Hermandad del Nazareno", zone: "h", address: "Plaza del Padre Cristóbal", lat: 37.88451, lng: -4.77552, desc: "Cruz con gran devoción en San Agustín.", tags: ["San Agustín", "Casco Histórico"], award: "🥉 3er Premio" },
+  { id: 26, name: "Hermandad del Descendimiento", zone: "m", address: "Jardines Virgen del Rocío", lat: 37.87551, lng: -4.77402, desc: "Al otro lado del río, ambiente familiar.", tags: ["Miraflores", "Zona Moderna"], award: null },
+  { id: 27, name: "Hermandad del Amor", zone: "m", address: "Avda. Fray Albino", lat: 37.87502, lng: -4.77605, desc: "Vistas espectaculares a la Mezquita.", tags: ["Fray Albino", "Zona Moderna"], award: null },
+  { id: 28, name: "Hermandad de la Sagrada Cena", zone: "m", address: "C/ José Dámaso Pepete", lat: 37.89501, lng: -4.80504, desc: "Cruz de referencia en el barrio de Ciudad Jardín.", tags: ["Ciudad Jardín", "Zona Moderna"], award: "🏅 Premio adicional" },
+  { id: 29, name: "Acpacys", zone: "c", address: "C/ Dolores Ibárruri, 2", lat: 37.89291, lng: -4.78425, desc: "Referente en inclusión y calidad floral.", tags: ["Solidaridad", "Recinto Cerrado"], award: "🥇 1er Premio Cerrados" },
+  { id: 30, name: "Asoc. Colega de Córdoba", zone: "m", address: "Plaza de España", lat: 37.89232, lng: -4.77851, desc: "Ambiente joven y diverso.", tags: ["Plaza España", "Zona Moderna"], award: null },
+  { id: 31, name: "Asoc. Cultural Los Quintos", zone: "m", address: "Bulevar Hernán Ruiz", lat: 37.88931, lng: -4.78852, desc: "Un clásico de las zonas modernas.", tags: ["Hernán Ruiz", "Zona Moderna"], award: "🏅 Premio adicional" },
+  { id: 32, name: "Asoc. Vecinal Huerta del Rey", zone: "m", address: "C/ Cairuán", lat: 37.87852, lng: -4.78451, desc: "Junto a las murallas de la ciudad.", tags: ["Murallas", "Zona Moderna"], award: "🥉 3er Premio" },
+  { id: 33, name: "Asoc. Vecinal Alcázar Viejo", zone: "c", address: "C/ San Basilio (Torre de Belén)", lat: 37.87672, lng: -4.78652, desc: "En el barrio de los patios.", tags: ["San Basilio", "Recinto Cerrado"], award: "🥇 1er Premio" },
+  { id: 34, name: "Hermandad del Santo Sepulcro", zone: "c", address: "Triunfo de San Rafael (C/ Torrijos)", lat: 37.87812, lng: -4.78014, desc: "Ubicación privilegiada junto a la Mezquita.", tags: ["Mezquita", "Recinto Cerrado"], award: null },
+  { id: 35, name: "Asoc. Vecinal La Promisión", zone: "m", address: "Plaza de los Ríos (Villarrubia)", lat: 37.85902, lng: -4.89301, desc: "La fiesta llega a la barriada de Villarrubia.", tags: ["Villarrubia", "Zona Moderna"], award: null },
+  { id: 36, name: "Club Matrimonios La Unión", zone: "c", address: "C/ Bilbao, 1", lat: 37.88342, lng: -4.80051, desc: "Recinto con gran solera y ambiente de baile.", tags: ["La Unión", "Recinto Cerrado"], award: null },
+  { id: 37, name: "Asoc. Vecinal Cañero Nuevo", zone: "m", address: "C/ Párroco Bartolomé Blanco", lat: 37.88152, lng: -4.75654, desc: "Cruz ganadora en múltiples ocasiones.", tags: ["Cañero", "Zona Moderna"], award: "🥇 1er Premio Modernas" },
+  { id: 38, name: "Hermandad de la Merced", zone: "m", address: "Jardines Pedro Gámez Laserna", lat: 37.87815, lng: -4.76231, desc: "En la zona del Levante cordobés.", tags: ["Levante", "Zona Moderna"], award: "🥉 3er Premio" },
+  { id: 39, name: "Hdad. del Cristo de Gracia", zone: "c", address: "C/ Queso", lat: 37.88202, lng: -4.77351, desc: "Cerca de la parroquia de San Lorenzo.", tags: ["San Lorenzo", "Recinto Cerrado"], award: "🥈 2º Premio" },
+  { id: 40, name: "Hermandad del Buen Suceso", zone: "h", address: "Plaza del Poeta Juan Bernier", lat: 37.88371, lng: -4.77254, desc: "Pequeña plaza con mucho encanto.", tags: ["San Andrés", "Casco Histórico"], award: null },
+  { id: 41, name: "Hermandad de las Penas de Santiago", zone: "h", address: "Plaza de San Andrés", lat: 37.88554, lng: -4.77455, desc: "Entorno románico inigualable.", tags: ["San Andrés", "Casco Histórico"], award: null },
+  { id: 42, name: "Hdad. de las Cinco Llagas", zone: "m", address: "Plaza del Jazmín", lat: 37.88204, lng: -4.75681, desc: "Cruz de barrio con mucha participación.", tags: ["Levante", "Zona Moderna"], award: null },
+  { id: 43, name: "Asoc. Vecinal La Medina", zone: "h", address: "Plaza de Jerónimo Páez", lat: 37.88085, lng: -4.77708, desc: "Junto al Museo Arqueológico.", tags: ["Judería", "Casco Histórico"], award: "🥇 1er Premio 2025" },
+  { id: 44, name: "Casa Regional Castilla-La Mancha", zone: "m", address: "Jardines Adolfo Suárez", lat: 37.88732, lng: -4.75691, desc: "Participación regional en la fiesta cordobesa.", tags: ["Poniente", "Zona Moderna"], award: null },
+  { id: 45, name: "Hermandad de la Pasión", zone: "m", address: "Bulevar Emilia Pardo Bazán", lat: 37.88752, lng: -4.80351, desc: "Gran cruz en la zona de expansión.", tags: ["Poniente", "Zona Moderna"], award: null },
+  { id: 46, name: "Hermandad de la Buena Muerte", zone: "h", address: "Plaza San Ignacio de Loyola", lat: 37.88602, lng: -4.78184, desc: "Elegante cruz en el centro.", tags: ["San Hipólito", "Casco Histórico"], award: null },
+  { id: 47, name: "Hermandad de la Borriquita", zone: "h", address: "Plaza de San Agustín", lat: 37.88825, lng: -4.77201, desc: "Centro del barrio de San Agustín.", tags: ["San Agustín", "Casco Histórico"], award: null },
+  { id: 48, name: "Santuario de la Fuensanta", zone: "m", address: "Plaza del Santuario", lat: 37.87952, lng: -4.76101, desc: "Junto a la casa de la patrona de Córdoba.", tags: ["Fuensanta", "Zona Moderna"], award: null },
+  { id: 49, name: "Asoc. Cultural Es Vida", zone: "m", address: "Avda. de los Piconeros", lat: 37.89352, lng: -4.77551, desc: "Ambiente festivo en el norte.", tags: ["Norte", "Zona Moderna"], award: null },
+  { id: 50, name: "Asoc. Tradición Cordobesa", zone: "m", address: "C/ Carril de los Toros", lat: 37.89324, lng: -4.77682, desc: "Puesta en valor de las costumbres locales.", tags: ["Norte", "Zona Moderna"], award: null },
+  { id: 51, name: "Parroquia del Carmen (Magdalena)", zone: "h", address: "Plaza de la Magdalena", lat: 37.88401, lng: -4.76805, desc: "Plaza recuperada para la fiesta.", tags: ["Magdalena", "Casco Histórico"], award: "🏅 Premio adicional" },
+  { id: 52, name: "Hermandad del Rescatado", zone: "m", address: "Jardines Madre Coraje", lat: 37.88902, lng: -4.75901, desc: "Devoción trinitaria en el barrio.", tags: ["Levante", "Zona Moderna"], award: null },
+  { id: 53, name: "Asoc. Vecinal Arenal Arcángel", zone: "c", address: "Instalaciones Enrique Puga", lat: 37.87102, lng: -4.75701, desc: "Recinto vecinal amplio.", tags: ["El Arenal", "Recinto Cerrado"], award: null }
 ];
 
 // ══════════════════════════════════════════════════════════════════
