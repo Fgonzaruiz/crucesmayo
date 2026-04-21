@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cruces de Mayo 2026 – Córdoba</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Cinzel:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --crimson: #7A0C0C;
+      --rose: #B5261F;
+      --gold: #C9920A;
+      --gold-light: #E8B84B;
+      --gold-pale: #F5D88A;
+      --cream: #FDF6EC;
+      --parchment: #F0DEB8;
+      --dark: #120505;
+      --darker: #0A0202;
+      --sidebar-w: 340px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      font-family: 'Cormorant Garamond', serif;
+      background: var(--darker);
+      color: var(--cream);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* HEADER */
+    header {
+      background: linear-gradient(100deg, #5C0808 0%, #3A0404 50%, #1A0202 100%);
+      border-bottom: 1.5px solid var(--gold);
+      padding: 0 22px;
+      height: 58px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 1000;
+      overflow: hidden;
+    }
+    header::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 15% 50%, rgba(200,146,10,0.1) 0%, transparent 55%),
+                  radial-gradient(ellipse at 85% 50%, rgba(200,146,10,0.07) 0%, transparent 55%);
+      pointer-events: none;
+    }
+    .hbrand { display:flex; align-items:center; gap:13px; z-index:1; }
+    .hcross { width:36px; height:36px; flex-shrink:0; }
+    .hcross svg { width:100%; height:100%; filter:drop-shadow(0 0 5px rgba(200,146,10,.55)); }
+    .htitle h1 {
+      font-family:'Cinzel',serif; font-size:1.45rem; font-weight:700;
+      color:var(--gold-light); letter-spacing:.05em; line-height:1;
+    }
+    .htitle p {
+      font-family:'Cormorant Garamond',serif; font-style:italic;
+      font-size:.82rem; color:var(--parchment); opacity:.8; margin-top:1px;
+    }
+    .hinfo { z-index:1; text-align:right; }
+    .hinfo .city { font-family:'Cinzel',serif; font-size:.6rem; letter-spacing:.14em; color:var(--gold); display:block; }
+    .hinfo .dates { font-family:'Playfair Display',serif; font-size:1rem; color:var(--cream); display:block; }
+
+    /* LAYOUT */
+    .app { flex:1; display:flex; overflow:hidden; position:relative; }
+
+    /* SIDEBAR */
+    .sidebar {
+      width:var(--sidebar-w);
+      background:linear-gradient(180deg,#180606 0%,#0E0303 100%);
+      border-right:1px solid rgba(200,146,10,.25);
+      display:flex; flex-direction:column; overflow:hidden; flex-shrink:0;
+    }
+    .sw { padding:13px 14px 10px; background:rgba(122,12,12,.2); border-bottom:1px solid rgba(200,146,10,.18); flex-shrink:0; }
+    .slbl { font-family:'Cinzel',serif; font-size:.58rem; letter-spacing:.14em; color:var(--gold); text-transform:uppercase; display:block; margin-bottom:7px; }
+    .si { position:relative; }
+    .si svg { position:absolute; left:9px; top:50%; transform:translateY(-50%); width:14px; height:14px; color:var(--gold); opacity:.6; pointer-events:none; }
+    #q {
+      width:100%; background:rgba(255,255,255,.05); border:1px solid rgba(200,146,10,.3);
+      border-radius:5px; padding:7px 10px 7px 30px; color:var(--cream);
+      font-family:'Cormorant Garamond',serif; font-size:.93rem; outline:none;
+      transition:border-color .2s, background .2s;
+    }
+    #q::placeholder { color:rgba(240,222,184,.3); }
+    #q:focus { border-color:var(--gold); background:rgba(255,255,255,.08); }
+    .filters { display:flex; gap:5px; margin-top:8px; }
+    .fb {
+      flex:1; padding:4px 0; border-radius:4px; border:1px solid rgba(200,146,10,.25);
+      background:transparent; color:rgba(240,222,184,.55); font-family:'Cinzel',serif;
+      font-size:.52rem; letter-spacing:.06em; cursor:pointer; transition:all .2s;
+    }
+    .fb:hover, .fb.on { background:var(--crimson); border-color:var(--gold); color:var(--gold-light); }
+    .cnt { font-size:.7rem; color:var(--gold); opacity:.6; margin-top:5px; text-align:right; font-style:italic; }
+
+    /* LIST */
+    .list { flex:1; overflow-y:auto; padding:6px 7px; }
+    .list::-webkit-scrollbar { width:3px; }
+    .list::-webkit-scrollbar-thumb { background:rgba(200,146,10,.25); border-radius:2px; }
+    .item {
+      display:flex; align-items:center; gap:9px; padding:7px 9px;
+      border-radius:5px; cursor:pointer; border:1px solid transparent;
+      margin-bottom:2px; transition:background .18s, transform .12s, border-color .18s;
+      animation:slideIn .2s ease backwards;
+    }
+    .item:hover { background:rgba(122,12,12,.35); border-color:rgba(200,146,10,.18); transform:translateX(2px); }
+    .item.active { background:rgba(122,12,12,.6); border-color:rgba(200,146,10,.45); }
+    .item.gone { display:none; }
+    .num {
+      width:25px; height:25px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+      font-family:'Cinzel',serif; font-size:.6rem; font-weight:700; flex-shrink:0; border:1.5px solid;
+    }
+    .zh .num { background:rgba(25,70,190,.2);  border-color:#4F7EE0; color:#9DC0FF; }
+    .zm .num { background:rgba(20,150,70,.2);  border-color:#47C07A; color:#8FEFBB; }
+    .zc .num { background:rgba(200,115,20,.2); border-color:#D97E2A; color:#FFCA6F; }
+    .iname { font-size:.84rem; color:var(--cream); line-height:1.25; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .itag  { font-size:.58rem; font-style:italic; margin-top:1px; opacity:.55; }
+    .zh .itag { color:#9DC0FF; }
+    .zm .itag { color:#8FEFBB; }
+    .zc .itag { color:#FFCA6F; }
+
+    /* MAP */
+    #map { flex:1; z-index:1; }
+    .leaflet-container { background:#120505; }
+
+    /* POPUP */
+    .leaflet-popup-content-wrapper {
+      background:linear-gradient(145deg,#1E0707 0%,#100303 100%) !important;
+      border:1px solid var(--gold) !important;
+      border-radius:10px !important;
+      box-shadow:0 12px 40px rgba(0,0,0,.75),0 0 0 1px rgba(200,146,10,.15) !important;
+      padding:0 !important;
+      min-width:260px; max-width:300px;
+    }
+    .leaflet-popup-content { margin:0 !important; width:auto !important; color:var(--cream); }
+    .leaflet-popup-tip { background:#1E0707 !important; }
+    .leaflet-popup-close-button { color:var(--gold) !important; top:7px !important; right:9px !important; font-size:18px !important; }
+    .leaflet-control-zoom a { background:rgba(20,5,5,.88) !important; color:var(--gold-light) !important; border-color:rgba(200,146,10,.3) !important; }
+
+    .pp { padding:16px 18px 14px; }
+    .pph { display:flex; align-items:flex-start; gap:10px; margin-bottom:10px; padding-bottom:10px; border-bottom:1px solid rgba(200,146,10,.2); }
+    .ppi {
+      width:34px; height:34px; flex-shrink:0; display:flex; align-items:center; justify-content:center;
+      border-radius:50%; border:1.5px solid; font-family:'Cinzel',serif; font-weight:700; font-size:.65rem;
+    }
+    .pih { background:rgba(25,70,190,.18); border-color:#4F7EE0; color:#9DC0FF; }
+    .pim { background:rgba(20,150,70,.18);  border-color:#47C07A; color:#8FEFBB; }
+    .pic { background:rgba(200,115,20,.18); border-color:#D97E2A; color:#FFCA6F; }
+    .pptb { flex:1; min-width:0; }
+    .ppnl { font-family:'Cinzel',serif; font-size:.55rem; letter-spacing:.14em; color:var(--gold); opacity:.75; }
+    .ppn  { font-family:'Playfair Display',serif; font-size:1.05rem; font-weight:700; color:var(--gold-pale); line-height:1.25; margin:1px 0 5px; }
+    .ppzb { display:inline-flex; align-items:center; gap:4px; padding:2px 8px; border-radius:20px; font-size:.65rem; font-style:italic; }
+    .zbh  { background:rgba(25,70,190,.2);  color:#9DC0FF; border:1px solid rgba(79,126,224,.35); }
+    .zbm  { background:rgba(20,150,70,.2);  color:#8FEFBB; border:1px solid rgba(71,192,122,.35); }
+    .zbc  { background:rgba(200,115,20,.2); color:#FFCA6F; border:1px solid rgba(217,126,42,.35); }
+    .ppadr {
+      display:flex; align-items:flex-start; gap:6px; margin:8px 0;
+      font-size:.78rem; color:var(--parchment); opacity:.75;
+    }
+    .ppadr svg { width:12px; height:12px; flex-shrink:0; margin-top:2px; color:var(--gold); opacity:.7; }
+    .ppdesc { font-size:.82rem; line-height:1.6; color:rgba(253,246,236,.82); margin:8px 0; }
+    .pptags { display:flex; flex-wrap:wrap; gap:4px; margin:8px 0; }
+    .pptag { background:rgba(200,146,10,.1); border:1px solid rgba(200,146,10,.2); color:var(--gold-light); font-size:.6rem; padding:2px 7px; border-radius:20px; font-style:italic; }
+    .ppaw {
+      background:rgba(200,146,10,.12); border:1px solid rgba(200,146,10,.3); border-radius:6px;
+      padding:5px 9px; display:flex; align-items:center; gap:6px;
+      font-size:.72rem; color:var(--gold-light); margin:8px 0;
+    }
+    .ppaw span:first-child { font-size:1rem; }
+    .ppbtn {
+      display:flex; align-items:center; justify-content:center; gap:7px;
+      width:100%; margin-top:12px; padding:9px 14px;
+      background:linear-gradient(135deg,var(--crimson) 0%,#560606 100%);
+      border:1px solid var(--gold); border-radius:6px; color:var(--gold-light);
+      font-family:'Cinzel',serif; font-size:.7rem; letter-spacing:.08em;
+      text-decoration:none; cursor:pointer; transition:background .2s, transform .15s, box-shadow .2s;
+    }
+    .ppbtn:hover { background:linear-gradient(135deg,#8B1010 0%,#6A0808 100%); transform:translateY(-1px); box-shadow:0 4px 15px rgba(122,12,12,.5); }
+    .ppbtn svg { width:14px; height:14px; }
+
+    /* LEGEND */
+    .legend {
+      position:absolute; bottom:24px; right:12px; z-index:800;
+      background:rgba(15,3,3,.88); border:1px solid rgba(200,146,10,.35);
+      border-radius:8px; padding:10px 14px; backdrop-filter:blur(6px);
+    }
+    .lgt { font-family:'Cinzel',serif; font-size:.55rem; letter-spacing:.13em; color:var(--gold); margin-bottom:7px; text-transform:uppercase; }
+    .lgr { display:flex; align-items:center; gap:7px; margin-bottom:4px; font-size:.75rem; color:var(--parchment); }
+    .lgd { width:11px; height:11px; border-radius:50%; flex-shrink:0; }
+
+    /* MOBILE */
+    .mob { display:none; position:fixed; bottom:18px; left:50%; transform:translateX(-50%); z-index:2000;
+      background:linear-gradient(135deg,var(--crimson),#3A0404); color:var(--gold-light);
+      border:1.5px solid var(--gold); border-radius:28px; padding:9px 22px;
+      font-family:'Cinzel',serif; font-size:.7rem; letter-spacing:.1em; cursor:pointer; box-shadow:0 4px 20px rgba(0,0,0,.55); }
+    @media(max-width:680px){
+      .sidebar { position:fixed; left:0; top:0; bottom:0; z-index:1500; transform:translateX(-100%); transition:transform .28s ease; width:min(340px,92vw); padding-top:58px; }
+      .sidebar.open { transform:translateX(0); }
+      .mob { display:block; }
+    }
+    @keyframes slideIn { from{opacity:0;transform:translateX(-6px)} to{opacity:1;transform:translateX(0)} }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="hbrand">
+    <div class="hcross">
+      <svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg">
+        <rect x="15" y="3"  width="6" height="30" rx="1.5" fill="#C9920A"/>
+        <rect x="3"  y="13" width="30" height="6"  rx="1.5" fill="#C9920A"/>
+        <rect x="16" y="4"  width="4" height="28" rx="1"   fill="#E8B84B" opacity=".45"/>
+        <rect x="4"  y="14" width="28" height="4"  rx="1"   fill="#E8B84B" opacity=".45"/>
+      </svg>
+    </div>
+    <div class="htitle">
+      <h1>Cruces de Mayo 2026</h1>
+      <p>Mapa Interactivo · Córdoba</p>
+    </div>
+  </div>
+  <div class="hinfo">
+    <span class="city">Córdoba · Andalucía · España</span>
+    <strong class="dates">29 abril – 3 mayo</strong>
+  </div>
+</header>
+
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="sw">
+      <span class="slbl">✦ Buscar Cruz</span>
+      <div class="si">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input id="q" type="text" placeholder="Nombre, número, barrio…" autocomplete="off" />
+      </div>
+      <div class="filters">
+        <button class="fb on" data-z="all">Todas</button>
+        <button class="fb" data-z="h">Histórico</button>
+        <button class="fb" data-z="m">Modernas</button>
+        <button class="fb" data-z="c">Cerrados</button>
+      </div>
+      <div class="cnt" id="cnt">52 cruces</div>
+    </div>
+    <div class="list" id="list"></div>
+  </aside>
+
+  <div id="map"></div>
+
+  <div class="legend">
+    <div class="lgt">Zonas</div>
+    <div class="lgr"><div class="lgd" style="background:#4F7EE0"></div>Casco Histórico</div>
+    <div class="lgr"><div class="lgd" style="background:#47C07A"></div>Zonas Modernas</div>
+    <div class="lgr"><div class="lgd" style="background:#D97E2A"></div>Recintos Cerrados</div>
+  </div>
+</div>
+
+<button class="mob" id="mob">☩ Ver Lista</button>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+const Z = {
+  h:{ label:'Casco Histórico',   pi:'pih', zb:'zbh', lc:'zh', color:'#4F7EE0' },
+  m:{ label:'Zonas Modernas',    pi:'pim', zb:'zbm', lc:'zm', color:'#47C07A' },
+  c:{ label:'Recintos Cerrados', pi:'pic', zb:'zbc', lc:'zc', color:'#D97E2A' }
+};
+
+const DATA = [
+  {id:1,name:"Hermandad del Vía Crucis",zone:"h",address:"Pl. San Nicolás de la Villa, Córdoba",lat:37.8876,lng:-4.7840,
+   desc:"Una de las hermandades más veteranas del concurso. Instala su cruz en la bella Plaza de San Nicolás, junto a la iglesia homónima donde tiene su sede canónica. Su ubicación en el corazón del casco histórico la convierte en parada imprescindible de cualquier ruta de cruces.",
+   tags:["Semana Santa","Plaza San Nicolás","Casco histórico"],award:null},
+
+  {id:2,name:"Hdad. de la Sentencia",zone:"h",address:"Pl. San Felipe – San Nicolás, Córdoba",lat:37.8972,lng:-4.7786,
+   desc:"Fundada en 1944, llenó el vacío del Lunes Santo cordobés. Sus titulares, obra maestra del imaginero Juan Martínez Cerrillo, son joyas artísticas de primera magnitud. Durante sus primeros años ofreció asistencia legal gratuita a los presos de la Prisión Provincial, siendo ejemplo de hermandad con fuerte dimensión social.",
+   tags:["Fundada 1944","Lunes Santo","J.M. Cerrillo"],award:"🏆 Premio especial del jurado (múltiples ediciones)"},
+
+  {id:3,name:"Asoc. Amigos del Gazpacho",zone:"m",address:"C/ Doce de Octubre 3, Córdoba",lat:37.8936,lng:-4.7738,
+   desc:"Asociación cultural de marcado carácter festivo y gastronómico. Su cruz reúne lo mejor de la tradición popular cordobesa: flores, buena compañía y, por supuesto, el gazpacho más fresco de todo el mayo cordobés. Un rincón de alegría pura en zona moderna.",
+   tags:["Asociación cultural","Gastronomía","Tradición popular"],award:null},
+
+  {id:4,name:"Hermandad de los Dolores",zone:"h",address:"Pl. de Capuchinos, Córdoba",lat:37.8907,lng:-4.7752,
+   desc:"Hermandad penitencial de gran arraigo en el barrio de Capuchinos. Su Cristo de la Clemencia es una de las imágenes más populares de Córdoba. La hermandad tiene el mayor número de hermanos de toda la Semana Santa cordobesa, lo que se refleja en la masiva participación de su cruz de mayo.",
+   tags:["Más hermanos de Córdoba","Plaza Capuchinos","Viernes Santo"],award:"🏅 Accésit concurso (varias ediciones)"},
+
+  {id:5,name:"Hermandad de la Paz",zone:"h",address:"Cuesta del Bailío, Córdoba",lat:37.8885,lng:-4.7717,
+   desc:"Una de las cruces más fotografiadas del festival. Se instala en la mítica Cuesta del Bailío, con sus casas encaladas de incomparable belleza. Fundada en 1940 y símbolo de reconciliación tras la Guerra Civil, su Virgen de la Paz y Esperanza es Patrimonio Emocional de la ciudad.",
+   tags:["Fundada 1940","Cuesta del Bailío","Símbolo de paz"],award:"🥈 2.º Premio Casco Histórico (varias ediciones)"},
+
+  {id:6,name:"Hdad. Padre Jesús de la Sangre",zone:"h",address:"Pl. del Cardenal Toledo, Córdoba",lat:37.8866,lng:-4.7738,
+   desc:"Hermandad de honda tradición en el corazón del casco antiguo. Su imagen de Jesús con la Cruz a Cuestas recorre el Jueves Santo las calles empedradas del centro histórico. La cruz de mayo se convierte en escaparate de bordados y orfebrería de excepción.",
+   tags:["Jueves Santo","Arte floral","Centro histórico"],award:null},
+
+  {id:7,name:"Hermandad de la Santa Faz",zone:"h",address:"Pl. de la Compañía, Córdoba",lat:37.8858,lng:-4.7778,
+   desc:"Su emplazamiento en la histórica Plaza de la Compañía —frente a la iglesia jesuita del siglo XVII— crea una de las estampas más evocadoras del festival. Considerada parada obligatoria por todos los guías turísticos, sus flores se escogen con especial mimo cada año.",
+   tags:["Plaza de la Compañía","Iglesia jesuita s.XVII","Parada obligatoria"],award:null},
+
+  {id:8,name:"Hermandad del Huerto",zone:"h",address:"Zona C/ Encarnación – Heredia, Córdoba",lat:37.8832,lng:-4.7790,
+   desc:"La gran campeona del concurso. Ganadora del Primer Premio del Casco Histórico en múltiples ediciones —entre ellas 2018 y 2023—, es referencia absoluta de calidad floral y artística en Córdoba. Su equipo trabaja durante meses para crear una obra maestra efímera que el viento de mayo se lleva.",
+   tags:["Campeona histórica","Arte floral máximo","Obra maestra"],award:"🥇 1.er Premio Casco Histórico (2018, 2023 y más)"},
+
+  {id:9,name:"Peña Amigos de Lorena y Manolín",zone:"h",address:"Zona Pl. del Potro, Córdoba",lat:37.8805,lng:-4.7728,
+   desc:"Una de las peñas más queridas del festival, que mantiene viva la tradición del 'ir de cruces' en el barrio de La Corredera y El Potro. Ambiente familiar y festivo con sevillanas hasta el amanecer. El espíritu más genuino de las Cruces de Mayo.",
+   tags:["Peña cultural","Sevillanas","Ambiente festivo"],award:null},
+
+  {id:10,name:"Hdad. Jesús del Calvario",zone:"h",address:"Pl. de Abades, Córdoba",lat:37.8820,lng:-4.7773,
+   desc:"La Plaza de Abades, uno de los rincones más hermosos y recónditos del casco antiguo, cobra vida con la cruz de esta hermandad. Un lugar secreto que los turistas descubren como un tesoro escondido entre callejuelas medievales.",
+   tags:["Plaza Abades","Rincón secreto","Medieval"],award:"🏅 Premio adicional Casco Histórico"},
+
+  {id:11,name:"Hdad. del Socorro",zone:"h",address:"Pl. del Socorro, Córdoba",lat:37.8818,lng:-4.7755,
+   desc:"Arraigada hermandad que da vida cada mayo a la Plaza del Socorro, uno de esos rincones del casco antiguo donde arquitectura mudéjar y flores desbordantes crean una estampa irrepetible. Premiada en distintas ediciones, suma fieles y visitantes año tras año.",
+   tags:["Plaza del Socorro","Mudéjar y flores","Tradición barrial"],award:"🏅 Premio adicional (varias ediciones)"},
+
+  {id:12,name:"Hermandad de la Misericordia",zone:"h",address:"Pl. de San Pedro, Córdoba",lat:37.8800,lng:-4.7700,
+   desc:"Con sede en la bellísima Iglesia de San Pedro —uno de los templos mozárabes más antiguos de Córdoba—, instala su cruz en un entorno de ensueño histórico. Premio adicional habitual del concurso municipal de las Cruces.",
+   tags:["Iglesia San Pedro","Templo mozárabe","Historia viva"],award:"🏅 Premio adicional Casco Histórico (2018)"},
+
+  {id:13,name:"Hermandad de La Estrella",zone:"m",address:"Pasaje de las Almuñias, Córdoba",lat:37.8990,lng:-4.7940,
+   desc:"Cruz en la zona norte, en el pintoresco Pasaje de las Almuñias. Hermandad que combina fe y vecindad con una decoración floral que recuerda a los jardines andaluces de antaño. Su nombre evoca el cielo estrellado de las noches cálidas de mayo.",
+   tags:["Pasaje Almuñias","Jardín andaluz","Zona norte"],award:null},
+
+  {id:14,name:"Casa de Sevilla",zone:"c",address:"Ronda de Andújar 17, Córdoba",lat:37.8768,lng:-4.7622,
+   desc:"Sede de la comunidad sevillana residente en Córdoba. Su recinto cerrado es sinónimo de excelencia: flamencas impecables, vinos de Jerez y una decoración que rinde homenaje a las dos grandes capitales del sur. Premio adicional en 2018, sigue siendo uno de los recintos más elegantes del certamen.",
+   tags:["Comunidad sevillana","Flamenco y vino","Recinto selecto"],award:"🏅 Premio adicional Recintos Cerrados (2018)"},
+
+  {id:15,name:"Colegio Agentes Comerciales",zone:"c",address:"Zona norte Córdoba (C/ Dolores Ibarruri)",lat:37.8965,lng:-4.7793,
+   desc:"El Colegio de Agentes Comerciales transforma su sede en un recinto festivo de primera clase. Su espíritu de reunión profesional y social convierte el festival en una cita donde Córdoba se reencuentra consigo misma alrededor de una cruz engalanada con gusto.",
+   tags:["Recinto profesional","Ambiente selecto","Colegio histórico"],award:null},
+
+  {id:16,name:"Hermandad Cristo de Lágrimas",zone:"m",address:"Zona Avda. Turruñuelos, Córdoba",lat:37.8949,lng:-4.7855,
+   desc:"Hermandad del barrio norte que lleva décadas siendo referente en su zona. El Cristo de Lágrimas, imagen de gran emotividad, inspira una decoración floral que mezcla lo devocional con la explosión de color de la primavera cordobesa.",
+   tags:["Barrio norte","Imagen emotiva","Explosión de color"],award:null},
+
+  {id:17,name:"Hermandad de la Quinta Angustia",zone:"h",address:"Zona Avda. América / Gran Capitán, Córdoba",lat:37.8963,lng:-4.7766,
+   desc:"Su imagen titular representa el Descendimiento de Cristo del Calvario, escena de profundo dramatismo artístico. La hermandad instala una cruz de gran formato donde el blanco y morado dialogan con la ciudad, creando un contraste único entre tradición y modernidad.",
+   tags:["Descendimiento","Gran formato","Arte sacro"],award:null},
+
+  {id:18,name:"Hermandad de Jesús Caído",zone:"m",address:"Plaza Flor del Olivo, Córdoba",lat:37.8951,lng:-4.7700,
+   desc:"La Plaza Flor del Olivo se llena de vida con esta hermandad. La advocación de 'Jesús Caído' es una de las más populares de la devoción cordobesa; su cruz de mayo recoge ese mismo sentimiento de cercanía y emoción que tan bien define el espíritu de la fiesta.",
+   tags:["Plaza Flor del Olivo","Advocación popular","Devoción cercana"],award:null},
+
+  {id:19,name:"Acopinb",zone:"c",address:"Instalaciones Deportivas El Carmen, Córdoba",lat:37.8965,lng:-4.7625,
+   desc:"La Asociación Cordobesa para la Integración de Niñas y Niños Border Line lleva al festival su mensaje de inclusión y esperanza. Su recinto es uno de los más emocionantes del certamen, donde el verdadero protagonismo lo tienen los niños y sus familias.",
+   tags:["Inclusión social","Niños Border Line","Mensaje solidario"],award:"🥇 1.er Premio Recintos Cerrados (2018)"},
+
+  {id:20,name:"Hermandad de la Soledad",zone:"h",address:"Jardines de la Merced / Lagunilla, Córdoba",lat:37.8915,lng:-4.7699,
+   desc:"La Soledad es quizás la advocación mariana más intimista de la Semana Santa. Ubicada en los frondosos Jardines de la Merced, su cruz ofrece el contraste perfecto: exuberancia florida sobre austeridad serena. Una de las más premiadas en la categoría de Casco Histórico.",
+   tags:["Jardines de la Merced","Advocación mariana","Intimismo"],award:"🏅 Premio adicional Casco Histórico (2018)"},
+
+  {id:21,name:"Hermandad del Resucitado",zone:"h",address:"Pl. Conde de Priego, Córdoba",lat:37.8887,lng:-4.7702,
+   desc:"La única hermandad que sale el Domingo de Resurrección en Córdoba. Su espíritu de alegría pascual se traslada a mayo con una cruz luminosa y exuberante. Ganadora del 3.er Premio del Casco Histórico en 2018 y 2023, es sinónimo de creatividad floral.",
+   tags:["Domingo de Resurrección","Cruz luminosa","Alegría pascual"],award:"🥉 3.er Premio Casco Histórico (2018, 2023)"},
+
+  {id:22,name:"Hermandad de la Expiración",zone:"h",address:"Pl. Sacristía, Iglesia Sta. Marina, Córdoba",lat:37.8882,lng:-4.7693,
+   desc:"La Iglesia de Santa Marina, templo del siglo XIII, es el marco incomparable para esta hermandad. El último grito de Cristo en la Cruz da nombre a una cofradía que viste su plaza con claveles rojos que parecen sangrar belleza. Parada mística imprescindible.",
+   tags:["Iglesia s.XIII","Santa Marina","Claveles rojos"],award:null},
+
+  {id:23,name:"Hdad. Salesiana del Prendimiento",zone:"h",address:"C/ María Auxiliadora 12, Córdoba",lat:37.8780,lng:-4.7643,
+   desc:"Los Salesianos de Córdoba llevan décadas instalando una de las cruces más cuidadas del sur del casco histórico. Su vocación educativa se refleja en el ambiente familiar, donde los jóvenes aprenden el valor de la tradición participando en cada detalle de la decoración.",
+   tags:["Salesianos","Ambiente juvenil","Vocación educativa"],award:null},
+
+  {id:24,name:"Hermandad de la Esperanza",zone:"h",address:"Plaza Fuenseca 1 (Cine Fuenseca), Córdoba",lat:37.8785,lng:-4.7648,
+   desc:"La Esperanza —esa virtud tan andaluza— se materializa cada mayo en el emblemático espacio del antiguo Cine Fuenseca. La hermandad crea un ambiente de teatro y tradición único: como si el telón se alzara sobre la más bella de las escenas primaverales.",
+   tags:["Cine Fuenseca","Escena teatral","Esperanza andaluza"],award:null},
+
+  {id:25,name:"Hdad. Padre Jesús Nazareno",zone:"h",address:"Pl. Padre Cristóbal, Córdoba",lat:37.8845,lng:-4.7662,
+   desc:"La imagen del Nazareno con la cruz a cuestas es una de las más veneradas de Córdoba. Ganadora del 3.er Premio del Casco Histórico en 2023, su cruz de mayo combina devoción profunda con una maestría floral que año tras año sorprende al jurado y al público.",
+   tags:["Nazareno popular","Maestría floral","Premio 2023"],award:"🥉 3.er Premio Casco Histórico (2023)"},
+
+  {id:26,name:"Hdad. del Descendimiento",zone:"m",address:"Avda. Fray Albino (zona sur), Córdoba",lat:37.8682,lng:-4.7726,
+   desc:"En 2026 su lema es 'La Cruz del Barrio': volver al origen, a lo sencillo y cercano. Una cruz abierta a todos —vecinos de siempre y visitantes nuevos—, con talleres de sevillanas, flamenco en vivo y actividades infantiles. Un verdadero manifiesto de barrio.",
+   tags:["Lema 2026: 'La Cruz del Barrio'","Talleres sevillanas","Comunidad"],award:null},
+
+  {id:27,name:"Hermandad del Amor",zone:"m",address:"Avda. Fray Albino (frente a la Calahorra), Córdoba",lat:37.8700,lng:-4.7756,
+   desc:"Con la Torre de la Calahorra como telón de fondo —atalaya que guarda el Guadalquivir desde el siglo XIV—, la Cruz del Amor es una de las más románticas del festival. El amor como advocación y como ambiente: parejas, familias, sevillanas y el río susurrando mayo.",
+   tags:["Torre de la Calahorra","Guadalquivir","Cruz romántica"],award:null},
+
+  {id:28,name:"Hdad. de la Sagrada Cena",zone:"m",address:"J. Dámaso 'Pepete', Barriada Villarrubia, Córdoba",lat:37.8728,lng:-4.8048,
+   desc:"En la barriada de Villarrubia, lejos del centro turístico pero con el mismo fervor, la Hermandad de la Sagrada Cena crea un ambiente de vecindad auténtica. Su cruz es una celebración de unidad: como aquella última cena donde todo empezó. Premio adicional en varias ediciones.",
+   tags:["Barriada Villarrubia","Fervor de barrio","Comunidad"],award:"🏅 Premio adicional Zonas Modernas"},
+
+  {id:29,name:"Acpacys",zone:"c",address:"C/ Dolores Ibarruri 2, Córdoba",lat:37.8971,lng:-4.7843,
+   desc:"La Asociación Cordobesa de Parálisis Cerebral monta año tras año una de las cruces más emotivas del certamen. Ganadora del Primer Premio de Recintos Cerrados en múltiples ediciones, demuestra que la inclusión y la belleza son siempre inseparables.",
+   tags:["Parálisis Cerebral","Inclusión","Cruz más emotiva"],award:"🥇 1.er Premio Recintos Cerrados (múltiples ediciones)"},
+
+  {id:30,name:"Asoc. Colega Córdoba",zone:"c",address:"Zona Avda. América / Gran Capitán, Córdoba",lat:37.8958,lng:-4.7764,
+   desc:"Asociación de gran arraigo social, que convierte su recinto cerrado en uno de los espacios más animados del festival. Colega Córdoba es sinónimo de buen ambiente, flamenco y esa amistad cálida que solo existe en las noches de mayo cordobesas.",
+   tags:["Asociación social","Flamenco nocturno","Buen ambiente"],award:null},
+
+  {id:31,name:"Asoc. Cult. Los Quintos",zone:"c",address:"Zona Avda. Gran Capitán, Córdoba",lat:37.8940,lng:-4.7700,
+   desc:"Los Quintos llevan décadas siendo Premio Adicional del concurso en Recintos Cerrados. Su espíritu joven y tradicional al mismo tiempo crea cada año una sorpresa visual que mezcla flores, humor e identidad cordobesa pura.",
+   tags:["Premio adicional histórico","Espíritu joven","Identidad cordobesa"],award:"🏅 Premio adicional Recintos Cerrados (varias ediciones)"},
+
+  {id:32,name:"Asoc. Vec. Huerta del Rey",zone:"m",address:"C/ Cairuan s/n, Córdoba",lat:37.8818,lng:-4.7953,
+   desc:"Una de las asociaciones de vecinos más activas de la ciudad. Ganadora del 3.er Premio de Zonas Modernas en 2018, Huerta del Rey es un barrio que vive sus fiestas con intensidad. La calle Cairuan se viste de flores y sus vecinos, de gala.",
+   tags:["Barrio Huerta del Rey","Vecinos activos","Calle Cairuan"],award:"🥉 3.er Premio Zonas Modernas (2018)"},
+
+  {id:33,name:"Asoc. Vec. Alcázar Viejo",zone:"h",address:"Torre de Belén, C/ San Basilio 13, Córdoba",lat:37.8788,lng:-4.7885,
+   desc:"El barrio del Alcázar Viejo, con su laberinto de callejuelas blanquísimas junto al Alcázar de los Reyes Cristianos, es uno de los más queridos de Córdoba. Su cruz, enmarcada por la Torre de Belén, ganó el Primer Premio del Casco Histórico en 2023.",
+   tags:["Torre de Belén","San Basilio","Callejuelas andaluzas"],award:"🥇 1.er Premio Casco Histórico (2023)"},
+
+  {id:34,name:"Hdad. del Santo Sepulcro",zone:"h",address:"Zona D. Victoria / Pl. San Andrés, Córdoba",lat:37.8833,lng:-4.7670,
+   desc:"La hermandad que proclama la espera tras la muerte. Su cruz de mayo, con predominio del blanco y el lila, es una meditación floral sobre el silencio del Sábado Santo. Premio adicional en la categoría de Recintos Cerrados en 2018.",
+   tags:["Sábado Santo","Blanco y lila","Meditación floral"],award:"🏅 Premio adicional (2018)"},
+
+  {id:35,name:"Asoc. Vec. La Promisión",zone:"m",address:"Plaza de los Ríos, Barriada Villarrubia, Córdoba",lat:37.8793,lng:-4.7990,
+   desc:"En la entrañable barriada de Villarrubia, la Asociación de Vecinos La Promisión llena la Plaza de los Ríos de flores y promesas: la de mantener viva la tradición en cada rincón de Córdoba. Premiada en distintas ediciones por su compromiso vecinal.",
+   tags:["Barriada Villarrubia","Plaza de los Ríos","Compromiso vecinal"],award:"🏅 Premio adicional Zonas Modernas"},
+
+  {id:36,name:"Club de Matrimonios La Unión",zone:"c",address:"Bilbao 1, Córdoba (zona oeste)",lat:37.8878,lng:-4.8005,
+   desc:"El Club de Matrimonios La Unión lleva al festival la ternura de décadas de vida compartida. Su recinto cerrado es el más familiar del certamen, donde los niños corren entre flores y los mayores bailan sevillanas juntos con la complicidad de toda una vida.",
+   tags:["Recinto familiar","Matrimonios","Sevillanas en pareja"],award:null},
+
+  {id:37,name:"Asoc. Vec. Cañero Nuevo",zone:"m",address:"C/ Párroco Bartolomé Blanco, Córdoba",lat:37.8718,lng:-4.7608,
+   desc:"Cañero es un barrio que pelea y gana. Campeona del Primer Premio de Zonas Modernas en múltiples ediciones, la AVV de Cañero Nuevo ha convertido su calle en una catedral de flores. Su secreto: meses de planificación y un amor sin límites al barrio.",
+   tags:["Barrio Cañero","Campeona Zonas Modernas","Meses de trabajo"],award:"🥇 1.er Premio Zonas Modernas (2018 y más)"},
+
+  {id:38,name:"Hermandad de la Merced",zone:"h",address:"Jardines Músico Pedro Gámez Laserna, Córdoba",lat:37.8820,lng:-4.7620,
+   desc:"Los bellos Jardines Pedro Gámez Laserna —homenaje al músico cordobés del s. XIX— acogen esta hermandad que une devoción y arte. El verde del jardín contrasta con el rojo de los claveles, creando una de las postales más buscadas por los fotógrafos del festival.",
+   tags:["Jardines históricos","Pedro Gámez Laserna","Postal fotográfica"],award:"🥉 3.er Premio Zonas Modernas (2018)"},
+
+  {id:39,name:"Hdad. Cristo de Gracia",zone:"h",address:"C/ Queso 5 – Peña Los Emires, Córdoba",lat:37.8820,lng:-4.7610,
+   desc:"La Peña Los Emires acoge la cruz de la Hermandad Cristo de Gracia en la coqueta calle del Queso, a un paso de la Mezquita-Catedral. Ganadora del 2.º Premio de Recintos Cerrados en 2018, su cruz es un espejo de la Córdoba más mestiza: cristiana, árabe y andaluza.",
+   tags:["Calle del Queso","Peña Los Emires","Córdoba mestiza"],award:"🥈 2.º Premio Recintos Cerrados (2018)"},
+
+  {id:40,name:"Hdad. del Buen Suceso",zone:"h",address:"Pl. Poeta Juan Bernier, Córdoba",lat:37.8843,lng:-4.7660,
+   desc:"La Hermandad del Buen Suceso lleva su devoción a la Plaza del Poeta Juan Bernier, homenaje al poeta cordobés más querido del s. XX. Cruz y poesía se funden en mayo: flores que son versos, colores que son metáforas de una primavera eterna.",
+   tags:["Plaza Poeta Bernier","Cruz y poesía","Homenaje literario"],award:null},
+
+  {id:41,name:"Hdad. Penas de Santiago",zone:"h",address:"Pl. de San Andrés, Córdoba",lat:37.8835,lng:-4.7665,
+   desc:"La Plaza de San Andrés, con su hermosa iglesia románica del siglo XIV, es el marco perfecto para esta hermandad. Las 'penas' del nombre no empañan un mayo de alegría: su cruz destaca por una arquitectura floral que parece desafiar la gravedad.",
+   tags:["Iglesia San Andrés s.XIV","Arquitectura floral","Plaza histórica"],award:null},
+
+  {id:42,name:"Hermandad Cinco Llagas",zone:"m",address:"Zona Ronda del Marrubial, Córdoba",lat:37.8888,lng:-4.7573,
+   desc:"Las cinco heridas de Cristo dan nombre a esta hermandad del este de la ciudad. Cinco pétalos, cinco colores, cinco momentos de belleza: así construyen su obra cada año, con una simbología que el visitante descifra paseando despacio entre sus flores.",
+   tags:["Simbología 'cinco'","Zona este","Arte conceptual"],award:null},
+
+  {id:43,name:"Asoc. Vec. la Medina",zone:"h",address:"Pl. Jerónimo Páez, Córdoba",lat:37.8840,lng:-4.7788,
+   desc:"La Medina —nombre que evoca la ciudad árabe original— instala su cruz junto al Museo Arqueológico de Córdoba. Córdoba sobre Córdoba: capas de historia bajo flores de mayo, en un lugar donde cada piedra tiene dos mil años de silencio.",
+   tags:["Museo Arqueológico","Córdoba árabe","Historia sobre historia"],award:null},
+
+  {id:44,name:"Casa regional Castilla Mancha",zone:"c",address:"Jardines Presidente D. (zona este), Córdoba",lat:37.8915,lng:-4.7567,
+   desc:"La comunidad castellano-manchega residente en Córdoba lleva al festival el sabor de La Mancha: azafrán, queso y el quijotesco empeño de hacer la cruz más bella. Recinto de gran hospitalidad donde los vinos de Valdepeñas corren tan libres como el Guadalquivir.",
+   tags:["Comunidad Castilla-La Mancha","Vinos de Valdepeñas","Hospitalidad manchega"],award:null},
+
+  {id:45,name:"Hdad. Cristo de la Pasión",zone:"m",address:"C/ Emilia Pardo Bulevar (zona oeste), Córdoba",lat:37.8873,lng:-4.8022,
+   desc:"Hermandad del oeste de la ciudad que vive su mayo con auténtica pasión. Instalada en el amplio bulevar de Emilia Pardo Bazán, su cruz monumental se convierte en punto de reunión de un barrio que celebra la primavera con la intensidad que merece.",
+   tags:["Bulevar Emilia Pardo","Cruz monumental","Barrio oeste"],award:null},
+
+  {id:46,name:"Hermandad la Buena Muerte",zone:"h",address:"Pl. Ignacio de Loyola, Córdoba",lat:37.8901,lng:-4.7793,
+   desc:"El nombre más paradójico de las Cruces: la Buena Muerte celebra la vida con una exuberancia floral única. Ubicada en la Plaza de Ignacio de Loyola, fundador de los jesuitas, mezcla la austeridad del nombre con la opulencia visual del mayo más florido.",
+   tags:["Paradoja floral","Plaza Loyola","Nombre único en Córdoba"],award:null},
+
+  {id:47,name:"Hdad. de la Borriquita",zone:"h",address:"Pl. de San Agustín, Córdoba",lat:37.8882,lng:-4.7672,
+   desc:"La entrada triunfal de Jesús en Jerusalén da nombre a esta hermandad que abre el Domingo de Ramos. Su cruz de mayo, en la hermosa Plaza de San Agustín, destaca por su colorido exuberante —naranja, amarillo, verde— que recuerda la primavera palestina.",
+   tags:["Domingo de Ramos","Plaza San Agustín","Colores mediterráneos"],award:null},
+
+  {id:48,name:"Parroquia N. Sra. Fuensanta",zone:"m",address:"Plaza Santuario Ntra. Sra. Fuensanta s/n, Córdoba",lat:37.8738,lng:-4.7642,
+   desc:"La Patrona de Córdoba tiene su propia plaza y su propia cruz de mayo. El Santuario de la Fuensanta, enclavado en un barrio tranquilo al sureste, se convierte durante estos días en el epicentro de una devoción que no distingue entre fiesta religiosa y popular.",
+   tags:["Patrona de Córdoba","Santuario Fuensanta","Devoción patronal"],award:null},
+
+  {id:49,name:"Asoc. Cultural es Vida",zone:"c",address:"Avda. de los Piconeros, Córdoba",lat:37.8977,lng:-4.7647,
+   desc:"'Es Vida' lo dice todo: asociación que celebra la existencia con flores y música. Una de las más joviales del certamen, donde los más jóvenes de Córdoba demuestran que la tradición tiene el futuro asegurado cuando se transmite con alegría genuina.",
+   tags:["Asociación juvenil","Celebración de la vida","Tradición y futuro"],award:null},
+
+  {id:50,name:"Asoc. Cul. Tradición Cordobesa",zone:"c",address:"Zona Avda. América (norte), Córdoba",lat:37.8993,lng:-4.7760,
+   desc:"El nombre es el programa: Tradición Cordobesa. Esta asociación se dedica a preservar y difundir lo más auténtico del folklore local. Su recinto cerrado es un museo vivo donde el traje de flamenca, el cante jondo y el clavel rojo son protagonistas absolutos.",
+   tags:["Folklore local","Cante jondo","Preservación cultural"],award:null},
+
+  {id:51,name:"Parroquia Ntra. Sra. del Carmen",zone:"m",address:"Plaza de la Magdalena, Córdoba",lat:37.8786,lng:-4.7688,
+   desc:"La bellísima Plaza de la Magdalena acoge la cruz de esta parroquia. La Virgen del Carmen, patrona de los marineros, se une al festival de flores terrestres con una devoción que llega del sur, de ese horizonte andaluz que siempre mira al mar.",
+   tags:["Plaza Magdalena","Virgen del Carmen","Advocación marinera"],award:"🏅 Premio adicional Zonas Modernas"},
+
+  {id:52,name:"Hermandad del Rescatado",zone:"m",address:"Zona Ronda del Marrubial / Jardines Elena Moyano, Córdoba",lat:37.8853,lng:-4.7558,
+   desc:"La última del mapa pero no la menos importante. El Rescatado —Cristo liberado de la muerte— inspira una cruz que cierra el festival en el extremo este de la ciudad. Un barrio periférico que cada mayo se convierte en corazón verdadero de Córdoba.",
+   tags:["Cristo liberado","Zona este","Barrio con corazón"],award:null}
+];
+
+/* ─── MAP ─── */
+const map = L.map('map',{center:[37.8880,-4.7797],zoom:14,zoomControl:false});
+L.control.zoom({position:'topright'}).addTo(map);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{
+  attribution:'© OpenStreetMap © CARTO',subdomains:'abcd',maxZoom:19
+}).addTo(map);
+
+/* ─── ICON ─── */
+function mkIcon(d){
+  const c=Z[d.zone].color;
+  return L.divIcon({
+    html:`<svg width="38" height="50" viewBox="0 0 38 50" xmlns="http://www.w3.org/2000/svg">
+      <defs><filter id="s${d.id}"><feDropShadow dx="0" dy="2.5" stdDeviation="2.5" flood-color="rgba(0,0,0,.65)"/></filter></defs>
+      <path d="M19 48C19 48 3 31 3 18.5A16 16 0 0 1 35 18.5C35 31 19 48 19 48Z" fill="${c}" opacity=".92" filter="url(#s${d.id})"/>
+      <path d="M19 48C19 48 3 31 3 18.5A16 16 0 0 1 35 18.5C35 31 19 48 19 48Z" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="1"/>
+      <rect x="17.2" y="10" width="3.6" height="13" rx="1" fill="rgba(255,255,255,.95)"/>
+      <rect x="11.5" y="14.5" width="15" height="3.6" rx="1" fill="rgba(255,255,255,.95)"/>
+      <text x="19" y="33" font-family="Cinzel,serif" font-size="7" fill="white" text-anchor="middle" font-weight="700">${d.id}</text>
+    </svg>`,
+    iconSize:[38,50],iconAnchor:[19,48],popupAnchor:[0,-50],className:''
+  });
+}
+
+/* ─── POPUP ─── */
+function mkPop(d){
+  const z=Z[d.zone];
+  const mapsUrl=`https://www.google.com/maps/dir/?api=1&destination=${d.lat},${d.lng}&travelmode=walking`;
+  return `<div class="pp">
+    <div class="pph">
+      <div class="ppi ${z.pi}">${d.id}</div>
+      <div class="pptb">
+        <div class="ppnl">CRUZ N.º ${d.id} · ${d.zone==='h'?'HISTÓRICO':d.zone==='m'?'MODERNAS':'CERRADO'}</div>
+        <div class="ppn">${d.name}</div>
+        <span class="ppzb ${z.zb}">✦ ${z.label}</span>
+      </div>
+    </div>
+    <div class="ppadr">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      <span>${d.address}</span>
+    </div>
+    <div class="ppdesc">${d.desc}</div>
+    ${d.award?`<div class="ppaw"><span>🏆</span><span>${d.award}</span></div>`:''}
+    <div class="pptags">${d.tags.map(t=>`<span class="pptag">${t}</span>`).join('')}</div>
+    <a class="ppbtn" href="${mapsUrl}" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+      Cómo llegar — Google Maps
+    </a>
+  </div>`;
+}
+
+/* ─── MARKERS ─── */
+const markers={};
+let activeZ='all';
+DATA.forEach(d=>{
+  const m=L.marker([d.lat,d.lng],{icon:mkIcon(d)}).addTo(map);
+  m.bindPopup(mkPop(d),{maxWidth:305});
+  m.on('click',()=>hilite(d.id));
+  markers[d.id]=m;
+});
+
+/* ─── SIDEBAR ─── */
+const listEl=document.getElementById('list');
+const cntEl=document.getElementById('cnt');
+
+DATA.forEach((d,i)=>{
+  const li=document.createElement('div');
+  li.className=`item ${Z[d.zone].lc}`;
+  li.dataset.id=d.id;
+  li.style.animationDelay=`${i*10}ms`;
+  li.innerHTML=`<div class="num">${d.id}</div><div style="flex:1;min-width:0"><div class="iname">${d.name}</div><div class="itag">${Z[d.zone].label}</div></div>`;
+  li.addEventListener('click',()=>{
+    flyTo(d); hilite(d.id);
+    if(window.innerWidth<=680) closeSidebar();
+  });
+  listEl.appendChild(li);
+});
+
+function hilite(id){
+  document.querySelectorAll('.item').forEach(el=>el.classList.remove('active'));
+  const el=listEl.querySelector(`[data-id="${id}"]`);
+  if(el){el.classList.add('active');el.scrollIntoView({behavior:'smooth',block:'nearest'});}
+}
+function flyTo(d){
+  map.flyTo([d.lat,d.lng],17,{duration:.9});
+  setTimeout(()=>markers[d.id].openPopup(),950);
+}
+
+/* ─── SEARCH & FILTER ─── */
+const qEl=document.getElementById('q');
+function refresh(){
+  const q=qEl.value.toLowerCase().trim();
+  let vis=0;
+  DATA.forEach(d=>{
+    const el=listEl.querySelector(`[data-id="${d.id}"]`);
+    const okZ=activeZ==='all'||d.zone===activeZ;
+    const okQ=!q||d.name.toLowerCase().includes(q)||String(d.id).includes(q)||d.address.toLowerCase().includes(q)||d.tags.some(t=>t.toLowerCase().includes(q));
+    const show=okZ&&okQ;
+    el.classList.toggle('gone',!show);
+    show?(map.hasLayer(markers[d.id])||markers[d.id].addTo(map)):(map.hasLayer(markers[d.id])&&map.removeLayer(markers[d.id]));
+    if(show)vis++;
+  });
+  cntEl.textContent=`${vis} cruz${vis!==1?'es':''}`;
+}
+qEl.addEventListener('input',refresh);
+document.querySelectorAll('.fb').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('.fb').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on');
+    activeZ=b.dataset.z;
+    refresh();
+  });
+});
+
+/* ─── CITY CROSS ─── */
+L.marker([37.8884,-4.7797],{icon:L.divIcon({
+  html:`<div style="background:rgba(181,38,31,.92);border:1.5px solid #C9920A;border-radius:4px;padding:3px 8px;font-family:Cinzel,serif;font-size:8px;color:#E8B84B;white-space:nowrap;box-shadow:0 2px 10px rgba(0,0,0,.65);letter-spacing:.08em">✝ CRUZ DE LA CIUDAD</div>`,
+  iconAnchor:[65,12],className:''
+})}).addTo(map);
+
+/* ─── MOBILE ─── */
+const sidebar=document.getElementById('sidebar'),mobBtn=document.getElementById('mob');
+mobBtn.addEventListener('click',()=>{
+  sidebar.classList.toggle('open');
+  mobBtn.textContent=sidebar.classList.contains('open')?'✕ Cerrar':'☩ Ver Lista';
+});
+function closeSidebar(){sidebar.classList.remove('open');mobBtn.textContent='☩ Ver Lista';}
+map.on('click',()=>{if(window.innerWidth<=680)closeSidebar();});
+</script>
+</body>
+</html>
